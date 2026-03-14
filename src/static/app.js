@@ -568,6 +568,9 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         `
         }
+        <button class="share-button" data-activity="${name}" aria-label="Share this activity">
+          📤 Share
+        </button>
       </div>
     `;
 
@@ -587,7 +590,56 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Add click handler for share button
+    const shareButton = activityCard.querySelector(".share-button");
+    shareButton.addEventListener("click", () => {
+      shareActivity(name, details);
+    });
+
     activitiesList.appendChild(activityCard);
+  }
+
+  // Build a shareable URL for a given activity
+  function getShareUrl(name) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("activity", name);
+    return url.toString();
+  }
+
+  // Share an activity using the Web Share API or clipboard fallback
+  async function shareActivity(name, details) {
+    const shareUrl = getShareUrl(name);
+    const shareText = `Check out "${name}" at Mergington High School!\n${details.description}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: name, text: shareText, url: shareUrl });
+      } catch (err) {
+        // User cancelled or share failed — no action needed
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        showShareFeedback(name);
+      } catch (err) {
+        // Clipboard not available — show the URL in a prompt as a last resort
+        window.prompt("Copy this link to share the activity:", shareUrl);
+      }
+    }
+  }
+
+  // Show a brief "Link copied!" confirmation near the share button
+  function showShareFeedback(activityName) {
+    const card = activitiesList.querySelector(
+      `.share-button[data-activity="${CSS.escape(activityName)}"]`
+    );
+    if (!card) return;
+    card.textContent = "✅ Link copied!";
+    card.disabled = true;
+    setTimeout(() => {
+      card.textContent = "📤 Share";
+      card.disabled = false;
+    }, 2000);
   }
 
   // Event listeners for search and filter
