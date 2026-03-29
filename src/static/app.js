@@ -25,6 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
 
+  // Dark mode elements
+  const darkModeToggle = document.getElementById("dark-mode-toggle");
+  const darkModeIcon = document.getElementById("dark-mode-icon");
+  const darkModeLabel = document.getElementById("dark-mode-label");
+
   // Activity categories with corresponding colors
   const activityTypes = {
     sports: { label: "Sports", color: "#e8f5e9", textColor: "#2e7d32" },
@@ -50,6 +55,35 @@ document.addEventListener("DOMContentLoaded", () => {
     afternoon: { start: "15:00", end: "18:00" }, // After school hours
     weekend: { days: ["Saturday", "Sunday"] }, // Weekend days
   };
+
+  // Dark mode: apply saved preference and update button label
+  function applyTheme(isDark) {
+    if (isDark) {
+      document.documentElement.setAttribute("data-theme", "dark");
+      darkModeIcon.textContent = "☀️";
+      darkModeLabel.textContent = "Light Mode";
+      darkModeToggle.setAttribute("aria-label", "Switch to light mode");
+      darkModeToggle.setAttribute("aria-pressed", "true");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+      darkModeIcon.textContent = "🌙";
+      darkModeLabel.textContent = "Dark Mode";
+      darkModeToggle.setAttribute("aria-label", "Switch to dark mode");
+      darkModeToggle.setAttribute("aria-pressed", "false");
+    }
+  }
+
+  function initializeDarkMode() {
+    const savedTheme = localStorage.getItem("theme");
+    applyTheme(savedTheme === "dark");
+  }
+
+  darkModeToggle.addEventListener("click", () => {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    const newIsDark = !isDark;
+    localStorage.setItem("theme", newIsDark ? "dark" : "light");
+    applyTheme(newIsDark);
+  });
 
   // Initialize filters from active elements
   function initializeFilters() {
@@ -916,5 +950,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize app
   checkAuthentication();
   initializeFilters();
+  initializeDarkMode();
   fetchActivities();
 });
